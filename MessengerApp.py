@@ -318,19 +318,19 @@ def read_messages(intent, session):
     session_attributes = {}
     should_end_session = False
     
-        host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-        port = 77
-        size = 8192
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host,port))
-        s.send('' + \
-                id + \
-                '|readMessage|')
-        data = s.recv(size)
-        s.close()
-        speech_output = str(data)
-        reprompt_text = str(data)
-        should_end_session = True;
+    host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
+    port = 77
+    size = 8192
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host,port))
+    s.send('' + \
+            id + \
+            '|readMessage|')
+    data = s.recv(size)
+    s.close()
+    speech_output = str(data)
+    reprompt_text = str(data)
+    should_end_session = True;
     else:
         speech_output = "I couldn't get those messages"
         reprompt_text = "I couldn't get those messages"
