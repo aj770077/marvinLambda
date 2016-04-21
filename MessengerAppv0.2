@@ -105,7 +105,7 @@ def send_prompt(intent, session):
 
     speech_output = "Who do you want to send the message to? "
     reprompt_text = "Who do you want to send the message to? "
-
+    
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
@@ -186,14 +186,14 @@ def send_message_now(intent, session):
         s.send(newmessage)
         data = s.recv(size)
         s.close()
-        speech_output = "I sent the message" + \
-                        message + \
-                        ' ' + \
-                        data
-        reprompt_text = "I sent the message" + \
-                        message + \
-                        ' ' + \
-                        data
+        speech_output = "I sent " + \
+                        recipient + \
+                        " the message " + \
+                        message
+        reprompt_text = "I sent " + \
+                        recipient + \
+                        " the message " + \
+                        message
         should_end_session = True;
     else:
         speech_output = "I don't understand the message"
@@ -233,18 +233,14 @@ def send_message_to_now(intent, session):
         s.send(newmessage)
         data = s.recv(size)
         s.close()
-        speech_output = "I tried to send " + \
+        speech_output = "I sent " + \
                         recipient + \
                         " the message " + \
-                        message + \
-                        ' ' + \
-                        data
-        reprompt_text = "I tried to send " + \
+                        message
+        reprompt_text = "I sent " + \
                         recipient + \
                         " the message " + \
-                        message + \
-                        ' ' + \
-                        data
+                        message
         should_end_session = True;
     else:
         speech_output = "I don't understand the message"
@@ -268,54 +264,51 @@ def request_inbox(intent, session):
     s.connect((host,port))
     s.send('' + \
             id + \
-            '|requestAmount|')
+            '|checkMessages|')
     data = s.recv(size)
     s.close()
-    speech_output = "You have" + \
-                    str(data) + \
-                    ' new messages.  Please say read message, followed by the message number'
-    reprompt_text = "You have" + \
-                    str(data) + \
-                    ' new messages.  Please say read message, followed by the message number'
+    speech_output = "You have messages from " + \
+                    str(data)
+    reprompt_text = "You have messages from " + \
+                    str(data)
     should_end_session = False;
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
         
+#Responds with all new messages from bob, starting from oldest first
 def read_message(intent, session):
-    """ Sets the color in the session and prepares the speech to reply to the
-    user.
-    """
+
     id = session['user']['userId']
     card_title = intent['name']
     session_attributes = {}
     should_end_session = False
-    if 'Number' in intent['slots']:
-        number = intent['slots']['Number']['value']
+
+    if 'Who' in intent['slots']:
+        who = intent['slots']['Who']['value']
         host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
         port = 80
-        size = 4096
+        size = 8192
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
         s.send('' + \
                 id + \
-                '|getMessage|' + \
-                number + \
+                '|readMessage|' + \
+                who + \
                 '|')
         data = s.recv(size)
         s.close()
-        speech_output = "Katherine said: " + \
-                        data
-        reprompt_text = "Katherine said: " + \
-                        data
+        speech_output = 'data'
+        reprompt_text = 'data'
         should_end_session = True;
     else:
-        speech_output = "I couldn't get that message"
-        reprompt_text = "I couldn't get that message"
+        speech_output = "I couldn't get those messages"
+        reprompt_text = "I couldn't get those messages"
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
 def create_recipient_attribute(person):
     return {"recipient": person}
+
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -347,7 +340,6 @@ def build_response(session_attributes, speechlet_response):
         'sessionAttributes': session_attributes,
         'response': speechlet_response
     }
-
 
 INTERACTIONS
 ----------------------------------------
@@ -396,8 +388,8 @@ INTENTS
       "intent": "ReadMessageIntent",
       "slots": [
         {
-          "name": "Number",
-          "type": "AMAZON.NUMBER"
+          "name": "Who",
+          "type": "AMAZON.US_FIRST_NAME"
         }
       ]
     },
@@ -419,6 +411,7 @@ SendToIntent send a message to {Who}
 SendToIntent send message to {Who}
 SendToIntent send {Who} a message
 SendToIntent {Who}
+SendToIntent to {Who}
 SendIntent send a message
 SendIntent send a message
 SendIntent message
@@ -493,16 +486,17 @@ CheckInboxIntent do i have any new messages
 CheckInboxIntent read my messages
 CheckInboxIntent open my inbox
 CheckInboxIntent open my messages
-ReadMessageIntent read message number {Number}
-ReadMessageIntent read message {Number}
-ReadMessageIntent read {Number}
-ReadMessageIntent read number {Number}
-ReadMessageIntent check message {Number}
-ReadMessageIntent check message number {Number}
-ReadMessageIntent check number {Number}
-ReadMessageIntent read me message number {Number}
-ReadMessageIntent read me message {Number}
-ReadMessageIntent read me {Number}
-ReadMessageIntent read me number {Number}
-
+ReadMessageIntent read message from {Who}
+ReadMessageIntent read {Who} message
+ReadMessageIntent read {Who}
+ReadMessageIntent read message {Who}
+ReadMessageIntent check messages from {Who}
+ReadMessageIntent check message from {Who}
+ReadMessageIntent check {Who} message
+ReadMessageIntent read me message from {Who}
+ReadMessageIntent read me the message from {Who}
+ReadMessageIntent read me {Who} message
+ReadMessageIntent read me {Who}
+ReadMessageIntent from {Who}
+ReadMessageIntent messages from {Who}
 
