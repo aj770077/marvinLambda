@@ -2,19 +2,19 @@ CREATE TABLE Marvin;
 
 CREATE TABLE messages (
   mid INT NOT NULL AUTO_INCREMENT,
-  uid INT NOT NULL,
+  uid INT NOT NULL UNIQUE,
   message TEXT,
   is_read BOOLEAN,
   date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  uid_from INT NOT NULL,
-  PRIMARY KEY (mid)
+  uid_from INT NOT NULL UNIQUE,
+  PRIMARY KEY (mid,uid, uid_from)
 );
 
 
 CREATE TABLE users (
   uid INT NOT NULL,
   name CHAR(20),
-  device_id INT NOT NULL,
+  device_id INT NOT NULL UNIQUE,
     PRIMARY KEY (uid),
     FOREIGN KEY (uid) REFERENCES messages(uid) ON DELETE CASCADE,
     FOREIGN KEY (uid) REFERENCES messages(uid_from) ON DELETE CASCADE
@@ -22,6 +22,6 @@ CREATE TABLE users (
 
 CREATE TABLE devices(
   device_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  token TEXT NOT NULL,
+  token VARCHAR(500) NOT NULL UNIQUE,
     FOREIGN KEY (device_id) REFERENCES users(device_id) ON DELETE CASCADE
 );
