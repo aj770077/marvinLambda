@@ -53,8 +53,10 @@ def on_intent(intent_request, session):
         return send_message_to_now(intent, session)
     elif intent_name == "CheckInboxIntent":
         return request_inbox(intent, session)
-    elif intent_name == "ReadMessageIntent":
+    elif intent_name == "ReadMessagesIntent":
         return read_message(intent, session)
+    elif intent_name == "ReadMessageIntent":
+        return read_messages(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return print_something_to_console(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
@@ -136,7 +138,7 @@ def print_something_to_console(intent, session):
     session_attributes = {}
     should_end_session = False
     host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-    port = 80
+    port = 77
     size = 4096
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host,port))
@@ -172,7 +174,7 @@ def send_message_now(intent, session):
     if 'Message' in intent['slots']:
         message = intent['slots']['Message']['value']
         host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-        port = 80
+        port = 77
         size = 4096
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
@@ -219,7 +221,7 @@ def send_message_to_now(intent, session):
             return build_response(session_attributes, build_speechlet_response(
                 card_title, speech_output, reprompt_text, should_end_session))
         host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-        port = 80
+        port = 77
         size = 4096
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
@@ -258,7 +260,7 @@ def request_inbox(intent, session):
     
     should_end_session = False
     host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-    port = 80
+    port = 77
     size = 4096
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host,port))
@@ -267,10 +269,8 @@ def request_inbox(intent, session):
             '|checkMessages|')
     data = s.recv(size)
     s.close()
-    speech_output = "You have messages from " + \
-                    str(data)
-    reprompt_text = "You have messages from " + \
-                    str(data)
+    speech_output = str(data)
+    reprompt_text = str(data)
     should_end_session = False;
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -286,7 +286,7 @@ def read_message(intent, session):
     if 'Who' in intent['slots']:
         who = intent['slots']['Who']['value']
         host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
-        port = 80
+        port = 77
         size = 8192
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host,port))
@@ -297,8 +297,34 @@ def read_message(intent, session):
                 '|')
         data = s.recv(size)
         s.close()
-        speech_output = 'data'
-        reprompt_text = 'data'
+        speech_output = str(data)
+        reprompt_text = str(data)
+        should_end_session = True;
+    else:
+        speech_output = "I couldn't get those messages"
+        reprompt_text = "I couldn't get those messages"
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+        
+#Reads all messages
+def read_messages(intent, session):
+
+    id = session['user']['userId']
+    session_attributes = {}
+    should_end_session = False
+    
+        host = 'ec2-52-90-241-171.compute-1.amazonaws.com'
+        port = 77
+        size = 8192
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host,port))
+        s.send('' + \
+                id + \
+                '|readMessage|')
+        data = s.recv(size)
+        s.close()
+        speech_output = str(data)
+        reprompt_text = str(data)
         should_end_session = True;
     else:
         speech_output = "I couldn't get those messages"
@@ -340,163 +366,3 @@ def build_response(session_attributes, speechlet_response):
         'sessionAttributes': session_attributes,
         'response': speechlet_response
     }
-
-INTERACTIONS
-----------------------------------------
-INTENTS
-
-{
-  "intents": [
-    {
-      "intent": "SendToIntent",
-      "slots": [
-        {
-          "name": "Who",
-          "type": "AMAZON.US_FIRST_NAME"
-        }
-      ]
-    },
-    {
-      "intent": "SendToNowIntent",
-      "slots": [
-        {
-          "name": "Who",
-          "type": "AMAZON.US_FIRST_NAME"
-        },
-        {
-          "name": "Message",
-          "type": "AMAZON.LITERAL"
-        }
-      ]
-    },
-    {
-      "intent": "SendNowIntent",
-      "slots": [
-        {
-          "name": "Message",
-          "type": "AMAZON.LITERAL"
-        }
-      ]
-    },
-    {
-      "intent": "CheckInboxIntent"
-    },
-        {
-      "intent": "HelpMeIntent"
-    },
-    {
-      "intent": "ReadMessageIntent",
-      "slots": [
-        {
-          "name": "Who",
-          "type": "AMAZON.US_FIRST_NAME"
-        }
-      ]
-    },
-    {
-      "intent": "SendIntent"
-    },
-    {
-      "intent": "AMAZON.HelpIntent"
-   }
-  ]
-}
-
---------------------------
-UTTERANCES
-
-SendToIntent i want to send a message to {Who}
-SendToIntent i want to send {Who} a message
-SendToIntent send a message to {Who}
-SendToIntent send message to {Who}
-SendToIntent send {Who} a message
-SendToIntent {Who}
-SendToIntent to {Who}
-SendIntent send a message
-SendIntent send a message
-SendIntent message
-HelpMeIntent help me please
-SendNowIntent {hello|Message}
-SendNowIntent {I'm home|Message}
-SendNowIntent {I am home|Message}
-SendNowIntent {You should get sleep|Message}
-SendNowIntent {I am working on Marvin|Message}
-SendNowIntent {What do you want for dinner|Message}
-SendNowIntent {You still need to clean the sink|Message}
-SendNowIntent {How much wood could a wood chuck chuck|Message}
-SendNowIntent {I just got home.  How was your day today|Message}
-SendNowIntent {I just got home.  How was your day at work|Message}
-SendNowIntent {I'm sorry Dave I'm afraid I can't let you do that|Message}
-SendNowIntent tell him {home|Message}
-SendNowIntent tell him {i'm home|Message}
-SendNowIntent tell him {what's for dinner|Message}
-SendNowIntent tell him {what is for dinner|Message}
-SendNowIntent tell him {who do you think are|Message}
-SendNowIntent tell her {home|Message}
-SendNowIntent tell her {i'm home|Message}
-SendNowIntent tell her {what's for dinner|Message}
-SendNowIntent tell her {what is for dinner|Message}
-SendNowIntent tell her {who do you think are|Message}
-SendNowIntent ask him {are you there|Message}
-SendNowIntent ask her {are you there|Message}
-SendNowIntent my message is {home|Message}
-SendNowIntent my message is {i'm home|Message}
-SendNowIntent my message is {what's for dinner|Message}
-SendNowIntent my message is {what is for dinner|Message}
-SendNowIntent my message is {who do you think are|Message}
-SendToNowIntent Tell {Who} I said {hello|Message}
-SendToNowIntent Tell {Who} I said {I'm home|Message}
-SendToNowIntent Tell {Who} I said {I am home|Message}
-SendToNowIntent Tell {Who} I said {You should get sleep|Message}
-SendToNowIntent Tell {Who} I said {I am working on Marvin|Message}
-SendToNowIntent Tell {Who} I said {What do you want for dinner|Message}
-SendToNowIntent Tell {Who} I said {You still need to clean the sink|Message}
-SendToNowIntent Tell {Who} I said {How much wood could a wood chuck chuck|Message}
-SendToNowIntent Tell {Who} I said {I just got home.  How was your day today|Message}
-SendToNowIntent Tell {Who} I said {I just got home.  How was your day at work|Message}
-SendToNowIntent Tell {Who} I said {I'm sorry Dave. I'm afraid I can't let you do that|Message}
-SendToNowIntent Tell {Who} that {hello|Message}
-SendToNowIntent Tell {Who} that {I'm home|Message}
-SendToNowIntent Tell {Who} that {I am home|Message}
-SendToNowIntent Tell {Who} that {You should get sleep|Message}
-SendToNowIntent Tell {Who} that {I am working on Marvin|Message}
-SendToNowIntent Tell {Who} that {What do you want for dinner|Message}
-SendToNowIntent Tell {Who} that {You still need to clean the sink|Message}
-SendToNowIntent Tell {Who} that {How much wood could a wood chuck chuck|Message}
-SendToNowIntent Tell {Who} that {I just got home.  How was your day today|Message}
-SendToNowIntent Tell {Who} that {I just got home.  How was your day at work|Message}
-SendToNowIntent Tell {Who} that {I'm sorry Dave. I'm afraid I can't let you do that|Message}
-SendToNowIntent Send {Who} the message {hello|Message}
-SendToNowIntent Send {Who} the message {I'm home|Message}
-SendToNowIntent Send {Who} the message {I am home|Message}
-SendToNowIntent Send {Who} the message {You should get sleep|Message}
-SendToNowIntent Send {Who} the message {I am working on Marvin|Message}
-SendToNowIntent Send {Who} the message {What do you want for dinner|Message}
-SendToNowIntent Send {Who} the message {You still need to clean the sink|Message}
-SendToNowIntent Send {Who} the message {How much wood could a wood chuck chuck|Message}
-SendToNowIntent Send {Who} the message {I just got home.  How was your day today|Message}
-SendToNowIntent Send {Who} the message {I just got home.  How was your day at work|Message}
-SendToNowIntent Send {Who} the message {I'm sorry Dave. I'm afraid I can't let you do that|Message}
-CheckInboxIntent check my messages
-CheckInboxIntent check my inbox
-CheckInboxIntent check messages
-CheckInboxIntent check inbox
-CheckInboxIntent do i have any messages
-CheckInboxIntent do i have any new messages
-CheckInboxIntent read my messages
-CheckInboxIntent open my inbox
-CheckInboxIntent open my messages
-ReadMessageIntent read message from {Who}
-ReadMessageIntent read {Who} message
-ReadMessageIntent read {Who}
-ReadMessageIntent read message {Who}
-ReadMessageIntent check messages from {Who}
-ReadMessageIntent check message from {Who}
-ReadMessageIntent check {Who} message
-ReadMessageIntent read me message from {Who}
-ReadMessageIntent read me the message from {Who}
-ReadMessageIntent read me {Who} message
-ReadMessageIntent read me {Who}
-ReadMessageIntent from {Who}
-ReadMessageIntent messages from {Who}
-
