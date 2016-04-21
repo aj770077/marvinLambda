@@ -29,7 +29,7 @@ client2.on_message = on_message
 
 client2.connect('localhost', 1883, 60)
 
-client2.subscribe('test') #SUBSCRIBE TO THE NAME OF THE PERSON
+client2.subscribe('Austin') #SUBSCRIBE TO THE NAME OF THE PERSON
 
 client2.loop_forever()
 
