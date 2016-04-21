@@ -7,7 +7,7 @@ import time
 # THIS BELONGS ON THE PI.  AN EXACT COPY OF THIS IS ON EACH PI
 
 host2 = socket.gethostbyname('ec2-52-90-241-171.compute-1.amazonaws.com') #GET TARGETS IP INTO THIS $
-port2 = 81
+port2 = 81  #CHANGE THIS PORT SO ITS UNIQUE TO EACH PI
 size2 = 2048
 print host2
 s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
