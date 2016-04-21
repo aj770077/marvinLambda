@@ -331,9 +331,6 @@ def read_messages(intent, session):
     speech_output = str(data)
     reprompt_text = str(data)
     should_end_session = True;
-    else:
-        speech_output = "I couldn't get those messages"
-        reprompt_text = "I couldn't get those messages"
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
